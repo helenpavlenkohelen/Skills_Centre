@@ -1,0 +1,52 @@
+.footer {
+	background: url("/images/backFoto.jpg") no-repeat center / cover;
+	position: relative;
+	width: 100%;
+	min-height: 200px;
+
+	&__wrap {
+		background-color: rgba(0, 0, 0, 0.8);
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+	}
+	&__container {
+		width: 100%;
+		max-width: 1400px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 50px 0;
+	}
+
+	&__logo {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 20px;
+		width: 30px;
+	}
+
+	&__logo img {
+		width: 40px;
+	}
+
+	&__list {
+		display: flex;
+		justify-content: space-between;
+		align-self: center;
+		width: 300px;
+	}
+
+	&__listLink {
+		color: white;
+		font-size: 20px;
+		margin: 0 10px;
+		font-size: 20px;
+		font-weight: bolder;
+	}
+}
