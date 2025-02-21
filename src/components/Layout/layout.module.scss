@@ -42,8 +42,8 @@
 			}
 		}
 		&__img {
-			width: 135px;
-			height: 135px;
+			width: 300px;
+			height: 300px;
 			border-radius: 50%;
 			background-color: white;
 			margin-bottom: 50px;
@@ -68,7 +68,6 @@
 	&__tegI,
 	&__tegUl,
 	&__tegUlX,
-	&__tegIX,
 	&__tegPX,
 	&__tegEmX,
 	&__tegMainX {
@@ -77,24 +76,24 @@
 		width: 85px;
 	}
 	&__teg {
-		top: 53%;
-		right: 20%;
+		top: 83%;
+		right: 30%;
 	}
 	&__tegEm {
-		top: 80%;
-		left: 60%;
+		bottom: 5%;
+		right: 5%;
 	}
 	&__tegP {
-		top: 21%;
-		right: 8%;
+		top: 40%;
+		right: 2%;
 	}
 	&__tegMain {
 		bottom: 10%;
 		left: 20%;
 	}
 	&__tegI {
-		bottom: 29%;
-		left: 32%;
+		top: 1%;
+		right: 2%;
 	}
 	&__tegUl {
 		top: 20%;
@@ -104,20 +103,16 @@
 		bottom: 1%;
 		left: 3%;
 	}
-	&__tegIX {
-		bottom: 1%;
-		right: 3%;
-	}
 	&__tegPX {
-		top: 20%;
-		left: 24%;
+		top: 45%;
+		left: 2%;
 	}
 	&__tegEmX {
-		top: 25%;
-		left: 13%;
+		top: 5%;
+		left: 8%;
 	}
 	&__tegMainX {
-		top: 7%;
+		top: 1%;
 		right: 60%;
 	}
 }

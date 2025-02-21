@@ -8,6 +8,7 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import styles from "./layout.module.scss";
 import { useEffect, useRef, useState } from "react";
+import { Outlet } from "react-router-dom";
 
 interface ICoordMouse {
 	x: number;
@@ -26,7 +27,7 @@ const Layout = () => {
 			className: styles.about__tegEm,
 			src: "/images/tegEm.png",
 			alt: "teg",
-			reverse: true,
+			reverse: false,
 		},
 		{
 			className: styles.about__tegP,
@@ -38,7 +39,7 @@ const Layout = () => {
 			className: styles.about__tegMain,
 			src: "/images/tegMain.png",
 			alt: "teg",
-			reverse: false,
+			reverse: true,
 		},
 		{
 			className: styles.about__tegUl,
@@ -56,14 +57,13 @@ const Layout = () => {
 			className: styles.about__tegUlX,
 			src: "/images/tegUl.png",
 			alt: "teg",
-			reverse: true,
+			reverse: false,
 		},
-		{ className: styles.about__tegIX, src: "/images/tegI.png", alt: "teg" },
 		{
 			className: styles.about__tegEmX,
 			src: "/images/tegEm.png",
 			alt: "teg",
-			reverse: true,
+			reverse: false,
 		},
 		{
 			className: styles.about__tegPX,
@@ -75,7 +75,7 @@ const Layout = () => {
 			className: styles.about__tegMainX,
 			src: "/images/tegMain.png",
 			alt: "teg",
-			reverse: true,
+			reverse: false,
 		},
 	]);
 
@@ -84,78 +84,196 @@ const Layout = () => {
 
 	useEffect(() => {
 		const div = document.querySelector(`.${styles.about__wrap}`);
-		if (div) {
-			div.addEventListener("mousemove", (e) => {
-				const coordinateX = e.clientX;
-				const coordinateY = e.clientY;
+		if (!div) return;
 
-				if (coordMouse.current.x < coordinateX) {
-					for (let i = 0; i < images.length; i++) {
-						const coordImage =
-							imagesRefs.current[i].getBoundingClientRect();
-						if (images[i].reverse == true) {
-							imagesRefs.current[i].style.left =
-								coordImage.x - 0.5 + "px";
-						} else {
-							imagesRefs.current[i].style.left =
-								coordImage.x + 0.5 + "px";
-						}
-					}
-				} else if (coordMouse.current.y < coordinateY) {
-					for (let i = 0; i < images.length; i++) {
-						const coordImage =
-							imagesRefs.current[i].getBoundingClientRect();
-						if (images[i].reverse == true) {
-							imagesRefs.current[i].style.top =
-								coordImage.top - 0.5 + "px";
-						} else {
-							imagesRefs.current[i].style.top =
-								coordImage.top + 0.5 + "px";
-						}
-					}
-				} else if (coordinateX > coordMouse.current.x) {
-					for (let i = 0; i < images.length; i++) {
-						const coordImage =
-							imagesRefs.current[i].getBoundingClientRect();
-						if (images[i].reverse == true) {
-							imagesRefs.current[i].style.right =
-								window.innerWidth -
-								coordImage.right -
-								0.5 +
-								"px";
-						} else {
-							imagesRefs.current[i].style.right =
-								window.innerWidth -
-								coordImage.right +
-								0.5 +
-								"px";
-						}
-					}
-				} else if (coordinateY > coordMouse.current.y) {
-					for (let i = 0; i < images.length; i++) {
-						const coordImage =
-							imagesRefs.current[i].getBoundingClientRect();
-						if (images[i].reverse == true) {
-							imagesRefs.current[i].style.bottom =
-								window.innerWidth -
-								coordImage.right -
-								0.5 +
-								"px";
-						} else {
-							imagesRefs.current[i].style.bottom =
-								window.innerWidth -
-								coordImage.right +
-								0.5 +
-								"px";
-						}
-					}
+		const speed = 0.1; // Скорость движения
+		const friction = 0.95; // Трение (чтобы не останавливалось резко)
+		const maxRotation = 15; // Максимальный угол поворота
+		const maxOffset = 100; // Максимальное отклонение от начальной позиции
+		const positions = new Map();
+		let changeSpeed = { x: 0, y: 0 };
+		let isMoving = false;
+
+		const updatePositions = () => {
+			if (!isMoving) {
+				changeSpeed.x *= friction;
+				changeSpeed.y *= friction;
+			}
+
+			imagesRefs.current.forEach((img, i) => {
+				if (!img) return;
+
+				let startPos = positions.get(img)?.start || {
+					x: img.offsetLeft,
+					y: img.offsetTop,
+				};
+				let prevPos = positions.get(img) || {
+					x: startPos.x,
+					y: startPos.y,
+					angle: 0,
+				};
+				const direction = images[i].reverse ? -1 : 1;
+
+				let newX = prevPos.x + changeSpeed.x * speed * direction;
+				let newY = prevPos.y + changeSpeed.y * speed * direction;
+				let newAngle = prevPos.angle + changeSpeed.x * 0.2;
+
+				// Ограничение вращения
+				newAngle = Math.max(
+					-maxRotation,
+					Math.min(newAngle, maxRotation)
+				);
+
+				// Ограничение движения в пределах maxOffset
+				newX = Math.max(
+					startPos.x - maxOffset,
+					Math.min(newX, startPos.x + maxOffset)
+				);
+				newY = Math.max(
+					startPos.y - maxOffset,
+					Math.min(newY, startPos.y + maxOffset)
+				);
+
+				// Ограничиваем движение в пределах окна
+				const { width, height } = img.getBoundingClientRect();
+				const maxX = window.innerWidth - width;
+				const maxY = window.innerHeight - height;
+
+				newX = Math.max(0, Math.min(newX, maxX));
+				newY = Math.max(0, Math.min(newY, maxY));
+
+				img.style.transform = `translate(${newX - startPos.x}px, ${
+					newY - startPos.y
+				}px) rotate(${newAngle}deg)`;
+				positions.set(img, {
+					x: newX,
+					y: newY,
+					angle: newAngle,
+					start: startPos,
+				});
+			});
+
+			if (
+				Math.abs(changeSpeed.x) > 0.01 ||
+				Math.abs(changeSpeed.y) > 0.01
+			) {
+				requestAnimationFrame(updatePositions);
+			} else {
+				isMoving = false;
+			}
+		};
+
+		div.addEventListener("mousemove", (e) => {
+			const { clientX, clientY } = e;
+			const windowWidth = window.innerWidth;
+			const windowHeight = window.innerHeight;
+
+			// Определяем центр окна
+			const centerX = windowWidth / 2;
+			const centerY = windowHeight / 2;
+
+			// Границы зоны активности (700x500px)
+			const zoneLeft = centerX - 750;
+			const zoneRight = centerX + 750;
+			const zoneTop = centerY - 250;
+			const zoneBottom = centerY + 550;
+
+			// Проверяем, находится ли курсор в зоне активности
+			const inZone =
+				clientX >= zoneLeft &&
+				clientX <= zoneRight &&
+				clientY >= zoneTop &&
+				clientY <= zoneBottom;
+
+			if (inZone) {
+				changeSpeed.x = clientX - coordMouse.current.x;
+				changeSpeed.y = clientY - coordMouse.current.y;
+
+				if (!isMoving) {
+					isMoving = true;
+					requestAnimationFrame(updatePositions);
 				}
 
-				coordMouse.current.x = coordinateX;
-				coordMouse.current.y = coordinateY;
-			});
-		}
+				coordMouse.current.x = clientX;
+				coordMouse.current.y = clientY;
+			}
+		});
 	}, []);
+
+	// useEffect(() => {
+	// 	const div = document.querySelector(`.${styles.about__wrap}`);
+	// 	if (div) {
+	// 		div.addEventListener("mousemove", (e) => {
+	// 			const coordinateX = e.clientX;
+	// 			const coordinateY = e.clientY;
+
+	// 			if (coordMouse.current.x < coordinateX) {
+	// 				for (let i = 0; i < images.length; i++) {
+	// 					const coordImage =
+	// 						imagesRefs.current[i].getBoundingClientRect();
+	// 					if (images[i].reverse == true) {
+	// 						imagesRefs.current[i].style.left =
+	// 							coordImage.x - 0.5 + "px";
+	// 					} else {
+	// 						imagesRefs.current[i].style.left =
+	// 							coordImage.x + 0.5 + "px";
+	// 					}
+	// 				}
+	// 			} else if (coordMouse.current.y < coordinateY) {
+	// 				for (let i = 0; i < images.length; i++) {
+	// 					const coordImage =
+	// 						imagesRefs.current[i].getBoundingClientRect();
+	// 					if (images[i].reverse == true) {
+	// 						imagesRefs.current[i].style.top =
+	// 							coordImage.top - 0.5 + "px";
+	// 					} else {
+	// 						imagesRefs.current[i].style.top =
+	// 							coordImage.top + 0.5 + "px";
+	// 					}
+	// 				}
+	// 			} else if (coordinateX > coordMouse.current.x) {
+	// 				for (let i = 0; i < images.length; i++) {
+	// 					const coordImage =
+	// 						imagesRefs.current[i].getBoundingClientRect();
+	// 					if (images[i].reverse == true) {
+	// 						imagesRefs.current[i].style.right =
+	// 							window.innerWidth -
+	// 							coordImage.right -
+	// 							0.5 +
+	// 							"px";
+	// 					} else {
+	// 						imagesRefs.current[i].style.right =
+	// 							window.innerWidth -
+	// 							coordImage.right +
+	// 							0.5 +
+	// 							"px";
+	// 					}
+	// 				}
+	// 			} else if (coordinateY > coordMouse.current.y) {
+	// 				for (let i = 0; i < images.length; i++) {
+	// 					const coordImage =
+	// 						imagesRefs.current[i].getBoundingClientRect();
+	// 					if (images[i].reverse == true) {
+	// 						imagesRefs.current[i].style.bottom =
+	// 							window.innerWidth -
+	// 							coordImage.right -
+	// 							0.5 +
+	// 							"px";
+	// 					} else {
+	// 						imagesRefs.current[i].style.bottom =
+	// 							window.innerWidth -
+	// 							coordImage.right +
+	// 							0.5 +
+	// 							"px";
+	// 					}
+	// 				}
+	// 			}
+
+	// 			coordMouse.current.x = coordinateX;
+	// 			coordMouse.current.y = coordinateY;
+	// 		});
+	// 	}
+	// }, []);
 
 	return (
 		<>
@@ -166,7 +284,7 @@ const Layout = () => {
 						<div className={styles.about__wrap__discripshion}>
 							<img
 								className={styles.about__wrap__img}
-								// src={"./images/mainFoto.jpg"}
+								src={"./images/mainFoto.jpg"}
 							/>
 							<h1
 								className={

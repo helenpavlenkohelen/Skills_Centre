@@ -1,6 +1,11 @@
 // import style from "./home.module.scss";
 const Home = () => {
-	return <div>Home</div>;
+	return (
+		<>
+			<section></section>
+			<section></section>
+		</>
+	);
 };
 
 export default Home;
